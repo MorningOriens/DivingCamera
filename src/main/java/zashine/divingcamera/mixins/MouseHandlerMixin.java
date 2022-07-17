@@ -29,7 +29,7 @@ public class MouseHandlerMixin {
         for (int i = 0; i < divingCamera.mouseInputs.size(); ++i) {
             result += (float)(0.018181818182 * (i + 1) * divingCamera.mouseInputs.get(i));
         }
-        divingCamera.mouseRool = result;
+        divingCamera.mouseRoll = result;
     }
 
 }

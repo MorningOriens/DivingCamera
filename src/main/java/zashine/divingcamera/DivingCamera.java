@@ -17,14 +17,15 @@ import java.util.ArrayList;
 public class DivingCamera {
 
     public static final String MOD_ID = "divingcamera";
-    public float lastRool;
-    public float rool;
-    public float mouseRool;
-    public float mouseRoolState;
-    public float mouseRoolStateRender;
+
+    public float lastRoll;
+    public float roll;
+    public float mouseRoll;
+    public float mouseRollState;
+    public float mouseRollStateRender;
     public long mouseResetTime;
-    public float inputRool;
-    public float inputRoolState;
+    public float inputRoll;
+    public float inputRollState;
     public ArrayList<Float> mouseInputs = new ArrayList<>() {
         {
             for (int i = 0; i < 10; ++i) {
@@ -44,7 +45,7 @@ public class DivingCamera {
     public void onSetupCamera(EntityViewRenderEvent.CameraSetup event) {
         if(Minecraft.getInstance().player != null)
         if(Minecraft.getInstance().player.isFallFlying()) {
-            event.setRoll((float) (this.lastRool + (this.rool - this.lastRool) * event.getPartialTicks()));
+            event.setRoll(Mth.lerp((float) event.getPartialTicks(), this.lastRoll, this.roll));
         }
     }
 
@@ -52,35 +53,37 @@ public class DivingCamera {
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) return;
         final float mouseSensitive = 0.4f;
-        this.lastRool = this.rool;
-        this.inputRoolState += this.inputRool;
+        this.lastRoll = this.roll;
+        this.inputRollState += this.inputRoll;
         final int length = 400;
         final int smoothLength = 100;
-        if (Mth.abs(this.mouseRool) > mouseSensitive) {
-            if (this.mouseRoolState * this.mouseRool < 0.0f) this.mouseRoolState = this.mouseRool;
-            else this.mouseRoolState += this.mouseRool;
+        if (Mth.abs(this.mouseRoll) > mouseSensitive) {
+            if (this.mouseRollState * this.mouseRoll < 0.0f) this.mouseRollState = this.mouseRoll;
+            else this.mouseRollState += this.mouseRoll;
             this.mouseResetTime = System.currentTimeMillis() + length;
-            this.mouseRool = 0.0f;
+            this.mouseRoll = 0.0f;
         }
-        if (Mth.abs(this.inputRoolState) < 2.0f) this.inputRoolState = 0.0f;
-        else if (this.inputRoolState > 0.0f) this.inputRoolState -= 2.0f;
-        else this.inputRoolState += 2.0f;
-        if (Mth.abs(this.mouseRoolState) > mouseSensitive && System.currentTimeMillis() > this.mouseResetTime - (length - smoothLength)) {
-            float offset = Mth.clamp((float)((System.currentTimeMillis() - (this.mouseResetTime - (length - smoothLength))) / (length - smoothLength)) * (Mth.abs(this.mouseRoolState) / 30.0f), 0.0f, 1.0f) * 3.0f;
-            if (Mth.abs(this.mouseRoolState) < offset) this.mouseRoolState = 0.0f;
-            else if (this.mouseRoolState > 0.0f) this.mouseRoolState -= offset;
-            else this.mouseRoolState += offset;
+        if (Mth.abs(this.inputRollState) < 2.0f) this.inputRollState = 0.0f;
+        else if (this.inputRollState > 0.0f) this.inputRollState -= 2.0f;
+        else this.inputRollState += 2.0f;
+        if (Mth.abs(this.mouseRollState) > mouseSensitive && System.currentTimeMillis() > this.mouseResetTime - (length - smoothLength)) {
+            float offset = Mth.clamp((float)((System.currentTimeMillis() - (this.mouseResetTime - (length - smoothLength))) / (length - smoothLength)) * (Mth.abs(this.mouseRollState) / 30.0f), 0.0f, 1.0f) * 3.0f;
+            if (Mth.abs(this.mouseRollState) < offset) this.mouseRollState = 0.0f;
+            else if (this.mouseRollState > 0.0f) this.mouseRollState -= offset;
+            else this.mouseRollState += offset;
         }
-        float renderOffset = 4.0f * 3.0f * Mth.abs(this.mouseRoolStateRender - this.mouseRoolState) / 60.0f;
-        if (Mth.abs(this.mouseRoolStateRender - this.mouseRoolState) < renderOffset) this.mouseRoolStateRender = this.mouseRoolState;
-        else if (this.mouseRoolStateRender > this.mouseRoolState) this.mouseRoolStateRender -= renderOffset;
-        else this.mouseRoolStateRender += renderOffset;
-        this.rool = Mth.clamp(this.inputRoolState, -10.0f, 10.0f) + Mth.clamp(this.mouseRoolState, -30.0f, 30.0f);
+        float renderOffset = 4.0f * 3.0f * Mth.abs(this.mouseRollStateRender - this.mouseRollState) / 60.0f;
+        if (Mth.abs(this.mouseRollStateRender - this.mouseRollState) < renderOffset) this.mouseRollStateRender = this.mouseRollState;
+        else if (this.mouseRollStateRender > this.mouseRollState) this.mouseRollStateRender -= renderOffset;
+        else this.mouseRollStateRender += renderOffset;
+        this.mouseRollState = Mth.clamp(this.mouseRollState, -30.0f, 30.0f);
+        this.inputRollState = Mth.clamp(this.inputRollState, -10.0f, 10.0f);
+        this.roll = mouseRollStateRender + inputRollState;
     }
 
     @SubscribeEvent
     public void onInput(MovementInputUpdateEvent event) {
-        this.inputRool = -3.0f * event.getInput().leftImpulse;
+        this.inputRoll = -3.0f * event.getInput().leftImpulse;
     }
 
     public static DivingCamera getInstance() {
