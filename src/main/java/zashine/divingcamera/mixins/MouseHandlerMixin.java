@@ -1,6 +1,7 @@
 package zashine.divingcamera.mixins;
 
 import net.minecraft.client.MouseHandler;
+import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,7 +25,7 @@ public class MouseHandlerMixin {
         divingCamera.mouseInputs.remove(0);
         final float mouseSensitive = 0.2f;
         final float mouseInput = (float)d2 * 0.35f;
-        divingCamera.mouseInputs.add(Math.abs(mouseInput) > mouseSensitive ? mouseInput : 0.0F);
+        divingCamera.mouseInputs.add(Mth.abs(mouseInput) > mouseSensitive ? mouseInput : 0.0F);
         float result = 0.0f;
         for (int i = 0; i < divingCamera.mouseInputs.size(); ++i) {
             result += (float)(0.018181818182 * (i + 1) * divingCamera.mouseInputs.get(i));
